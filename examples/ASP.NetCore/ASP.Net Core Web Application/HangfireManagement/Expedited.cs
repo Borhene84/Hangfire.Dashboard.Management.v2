@@ -4,7 +4,9 @@ using Hangfire.Dashboard.Management.v2.Support;
 using Hangfire.Server;
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace ASP.Net_Core_Web_Application.HangfireManagement
 {
@@ -52,10 +54,25 @@ namespace ASP.Net_Core_Web_Application.HangfireManagement
 			DefaultValue = TestEnum.Test5,
 			Description = "Based on an enum object"
 		)]
-		TestEnum enumTest
+		TestEnum enumTest,
+
+			[DisplayData(
+			Label = "Select Input Dynamic",
+			Description = "Based on method",
+			DynamicValue = true
+		)]
+		string dynamic
 		)
 		{
 			//Do awesome things here
+		}
+
+		internal async Task<List<string>> dynamicValuesAsync()
+		{
+			return new List<string>() {
+				"test 1",
+				"test 2"
+			};
 		}
 
 		public enum TestEnum

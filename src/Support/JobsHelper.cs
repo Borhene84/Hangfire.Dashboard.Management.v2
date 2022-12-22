@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-
+using Hangfire.Dashboard.Management.v2.Classes;
 using Hangfire.Dashboard.Management.v2.Metadata;
 
 namespace Hangfire.Dashboard.Management.v2.Support
@@ -12,6 +12,7 @@ namespace Hangfire.Dashboard.Management.v2.Support
 	public static class JobsHelper
 	{
 		public static List<JobMetadata> Metadata { get; private set; } = new List<JobMetadata>();
+		internal static List<JobType> JobTypes { get; set; } = new List<JobType>();
 		internal static List<ManagementPageAttribute> Pages { get; set; } = new List<ManagementPageAttribute>();
 
 		internal static void GetAllJobs(Assembly assembly)
@@ -58,6 +59,8 @@ namespace Hangfire.Dashboard.Management.v2.Support
 
 					Metadata.Add(meta);
 				}
+
+				JobTypes.Add(new JobType(Metadata.Last().SectionTitle, Metadata.Last().Name, ti));
 			}
 		}
 		public static List<string> GetAllQueues()

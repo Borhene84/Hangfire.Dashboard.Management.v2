@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 using Hangfire.Common;
+using Hangfire.Dashboard.Management.v2.Classes;
 using Hangfire.Dashboard.Management.v2.Metadata;
 using Hangfire.Dashboard.Management.v2.Support;
 using Hangfire.Dashboard.Pages;
@@ -269,6 +270,7 @@ namespace Hangfire.Dashboard.Management.v2.Pages
 
 			var jobs = JobsHelper.Metadata.Where(j => j.MenuName.Contains(menuName)).OrderBy(x => x.SectionTitle).ThenBy(x => x.Name);
 			var taskSections = jobs.Select(j => j.SectionTitle).Distinct().ToDictionary(k => k, v => string.Empty);
+			var sectionsTypes = JobsHelper.JobTypes.Where(t => taskSections.ContainsKey(t.SectionTitle)).ToList();
 
 			foreach (var section in taskSections.Keys)
 			{
@@ -295,7 +297,7 @@ namespace Hangfire.Dashboard.Management.v2.Pages
 				WriteLiteral($@"
 			<div id=""section_collapse_{scrubbedSection}"" class=""panel-collapse {(expanded ? "collapse in" : "collapse")}"" aria-expanded=""{(expanded ? "true" : "false")}"" aria-labelledby=""section_heading_{scrubbedSection}"" data-parent=""#jobsAccordion"">
 ");
-				PanelWriter(scrubbedSection, jobs.Where(j => j.SectionTitle == section).ToList());
+				PanelWriter(scrubbedSection, jobs.Where(j => j.SectionTitle == section).ToList(), sectionsTypes);
 				WriteLiteral($@"
 			</div>
 		</div>
@@ -362,12 +364,14 @@ namespace Hangfire.Dashboard.Management.v2.Pages
 </div>");
 		}
 
-		protected void PanelWriter(string section, List<JobMetadata> jobs)
+		protected void PanelWriter(string section, List<JobMetadata> jobs, List<JobType> sectionTypes)
 		{
 			foreach (var job in jobs)
 			{
 				var id = $"{section}_{job.Name.ScrubURL()}";
 				var expanded = jobs.First() == job;
+
+				var jobType = sectionTypes.Where(t => t.Name == job.Name).FirstOrDefault();
 
 				var options = new JObject();
 				var qAttr = job.MethodInfo.GetCustomAttributes(true).OfType<QueueAttribute>().FirstOrDefault();
@@ -418,7 +422,7 @@ namespace Hangfire.Dashboard.Management.v2.Pages
 			</div>
 			<div class=""panel-body"" style=""padding-bottom: 0px;"">
 ");
-				JobWriter(id, job);
+				JobWriter(id, job, jobType);
 				WriteLiteral($@"
 			</div>
 			<div class=""panel-footer"">
@@ -432,7 +436,7 @@ namespace Hangfire.Dashboard.Management.v2.Pages
 			}
 		}
 
-		protected void JobWriter(string id, JobMetadata job)
+		protected void JobWriter(string id, JobMetadata job, JobType jobType)
 		{
 			string inputs = string.Empty;
 
@@ -459,7 +463,31 @@ namespace Hangfire.Dashboard.Management.v2.Pages
 
 				if (parameterInfo.ParameterType == typeof(string))
 				{
-					inputs += InputTextbox(myId, displayInfo.CssClasses, labelText, placeholderText, displayInfo.Description, displayInfo.DefaultValue, displayInfo.IsDisabled, displayInfo.IsRequired);
+					if (displayInfo.DynamicValue)
+					{
+						if (jobType != default)
+						{
+							Task<List<string>> response;
+							var ti = jobType.Type;
+							var intParameters = ti.GetMethod($"{parameterInfo.Name}ValuesAsync", BindingFlags.NonPublic | BindingFlags.Instance);
+							if (intParameters != null)
+							{
+								var instance = (IJob)Activator.CreateInstance(ti);
+								response = (Task<List<string>>)intParameters.Invoke(instance, new object[] { });
+
+								var datas = new Dictionary<string, string>();
+								foreach (var v in response.Result)
+								{
+									datas.Add(v, v);
+								}
+								inputs += InputDataList(myId, displayInfo.CssClasses, labelText, placeholderText, displayInfo.Description, datas, response.Result.First());
+							}
+						}
+					}
+					else
+					{
+						inputs += InputTextbox(myId, displayInfo.CssClasses, labelText, placeholderText, displayInfo.Description, displayInfo.DefaultValue, displayInfo.IsDisabled, displayInfo.IsRequired);
+					}
 				}
 				else if (parameterInfo.ParameterType == typeof(int))
 				{
@@ -699,7 +727,7 @@ namespace Hangfire.Dashboard.Management.v2.Pages
 			var initText = (defaultValue != null ? defaultValue : (!string.IsNullOrWhiteSpace(placeholderText) ? placeholderText : "Select a value"));
 			var initValue = (defaultValue != null && data.ContainsKey(defaultValue)) ? data[defaultValue].ToString() : "";
 			var output = $@"
-<div class=""{cssClasses}"">
+<div class=""form-group {cssClasses}"">
 	<label class=""control-label"">{labelText}</label>
 	<div class=""dropdown"">
 		<button id=""{id}"" class=""btn btn-default dropdown-toggle input-control-data-list"" type=""button"" data-selectedvalue=""{initValue}"" data-toggle=""dropdown"" aria-haspopup=""true"" aria-expanded=""false"" {(isDisabled ? "disabled='disabled'" : "")}>
