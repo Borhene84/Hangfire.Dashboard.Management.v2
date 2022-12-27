@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -70,6 +70,8 @@ namespace ASP.Net_Core_Web_Application
 			{
 				endpoints.MapRazorPages();
 			});
+
+			app.UseHangfireDashboardManagement();
 
 			app.UseHangfireDashboard("/hangfire", new DashboardOptions()
 			{

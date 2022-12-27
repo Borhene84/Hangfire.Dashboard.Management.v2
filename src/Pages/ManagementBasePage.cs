@@ -467,20 +467,25 @@ namespace Hangfire.Dashboard.Management.v2.Pages
 					{
 						if (jobType != default)
 						{
-							Task<List<string>> response;
+							//var parameters = typeof(T)
+							//        .GetConstructors()
+							//        .Single()
+							//        .GetParameters()
+							//        .Select(p => (object)null)
+							//        .ToArray();
+							//T resource = (T)Activator.CreateInstance(typeof(T), parameters);
 							var ti = jobType.Type;
-							var intParameters = ti.GetMethod($"{parameterInfo.Name}ValuesAsync", BindingFlags.NonPublic | BindingFlags.Instance);
-							if (intParameters != null)
+							var initParameters = ti.GetMethod($"{parameterInfo.Name}ValuesAsync", BindingFlags.NonPublic | BindingFlags.Instance);
+							if (initParameters != null)
 							{
-								var instance = (IJob)Activator.CreateInstance(ti);
-								response = (Task<List<string>>)intParameters.Invoke(instance, new object[] { });
-
-								var datas = new Dictionary<string, string>();
-								foreach (var v in response.Result)
-								{
-									datas.Add(v, v);
-								}
-								inputs += InputDataList(myId, displayInfo.CssClasses, labelText, placeholderText, displayInfo.Description, datas, response.Result.First());
+								var constructor = ti.GetConstructors().Single();
+								var instance = constructor.Invoke(
+										constructor.GetParameters()
+											.Select(parameter => JobsHelper.ApplicationServices.GetService(parameter.ParameterType))
+											.ToArray()
+										);
+								Task<Dictionary<string, string>> response = (Task<Dictionary<string, string>>)initParameters.Invoke(instance, new object[] { });
+								inputs += InputDataList(myId, displayInfo.CssClasses, labelText, placeholderText, displayInfo.Description, response.Result, response.Result.Select(d => d.Key).First());
 							}
 						}
 					}

@@ -67,11 +67,12 @@ namespace ASP.Net_Core_Web_Application.HangfireManagement
 			//Do awesome things here
 		}
 
-		internal async Task<List<string>> dynamicValuesAsync()
+		internal async Task<Dictionary<string, string>> dynamicValuesAsync()
 		{
-			return new List<string>() {
-				"test 1",
-				"test 2"
+			return new Dictionary<string, string>()
+			{
+				{ "test 1", "test 1"},
+				{ "test 2", "test 2" }
 			};
 		}
 

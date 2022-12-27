@@ -6,11 +6,13 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Hangfire.Dashboard.Management.v2.Classes;
 using Hangfire.Dashboard.Management.v2.Metadata;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Hangfire.Dashboard.Management.v2.Support
 {
 	public static class JobsHelper
 	{
+		public static IServiceProvider ApplicationServices { get; set; }
 		public static List<JobMetadata> Metadata { get; private set; } = new List<JobMetadata>();
 		internal static List<JobType> JobTypes { get; set; } = new List<JobType>();
 		internal static List<ManagementPageAttribute> Pages { get; set; } = new List<ManagementPageAttribute>();

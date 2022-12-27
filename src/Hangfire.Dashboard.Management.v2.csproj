@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.1</TargetFrameworks>
 		<IsPackable>true</IsPackable>
 		<PackageOutputPath>artifacts</PackageOutputPath>
 		<PackageId>Hangfire.Dashboard.Management.v2</PackageId>
@@ -11,21 +11,21 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<Description />
-		<Version>2.2.0</Version>
+		<Version>2.3.0</Version>
 		<PackageTags>hangfire dashboard management</PackageTags>
 		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 		<RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
 		<Authors>Lance Courson</Authors>
 		<Company />
 		<Product>Hangfire.Dashboard.Management.v2</Product>
-		<AssemblyVersion>2.2.0.0</AssemblyVersion>
+		<AssemblyVersion>2.3.0.0</AssemblyVersion>
 		<PackageReleaseNotes></PackageReleaseNotes>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.1|AnyCPU'">
 	  <Optimize>true</Optimize>
 	  <DefineConstants>TRACE</DefineConstants>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
 	  <DebugType>full</DebugType>
 	  <DebugSymbols>true</DebugSymbols>
 	</PropertyGroup>
@@ -69,9 +69,14 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="HangFire.Core" Version="1.7.28" />
+	  <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include=".\..\README.md" Pack="true" PackagePath="" />
 		<None Include=".\..\LICENSE.md" Pack="true" PackagePath="" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="artifacts\" />
 	</ItemGroup>
 </Project>
